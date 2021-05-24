@@ -1,5 +1,4 @@
 import random
-import math
 
 #default settings
 grid_width = 9
@@ -63,7 +62,7 @@ def can_flag(x, y):
 
 def toggle_flag(x, y):
 	global flagged_table
-	assert can_flag(x, y)
+	#assert can_flag(x, y)
 	flagged_table ^= 1 << ((y+1)*(grid_width+1)+x+1)
 
 def can_uncover(x,y):
@@ -73,7 +72,7 @@ def can_uncover(x,y):
 
 def uncover(x, y):
 	global covered_table,flagged_table, done, won
-	assert can_uncover(x,y)
+	#assert can_uncover(x,y)
 	#check if mine
 	if ismine_table >> ((y+1)*(grid_width+1)+x+1) & 1:
 		covered_table ^= ismine_table
@@ -98,3 +97,4 @@ def uncover(x, y):
 		if can_uncover(x+1, y-1): uncover(x+1,y-1)	# top left
 		if can_uncover(x-1, y+1): uncover(x-1,y+1)	# bottom right
 		if can_uncover(x+1, y+1): uncover(x+1,y+1)	# bottom left
+

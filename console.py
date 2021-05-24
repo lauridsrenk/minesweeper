@@ -3,12 +3,12 @@ import internal as game
 def print_to_console():
 	def choose_symbol(x,y):
 		field_accessor = ((y+1)*(game.grid_width+1)+x+1)
-		if game.flagged_table >> field_accessor & 1: return "F "
-		if game.covered_table >> field_accessor & 1: return "\u2588 "
-		if game.ismine_table >> field_accessor & 1: return "M "
+		if game.flagged_table >> field_accessor & 1: return " F "
+		if game.covered_table >> field_accessor & 1: return " \u2588 "
+		if game.ismine_table >> field_accessor & 1: return " M "
 		nof_neighbors = (game.neighbors_map >> ((y*game.grid_width+x)*4) ) & 15
-		if nof_neighbors: return str(nof_neighbors)+" "
-		return "  "
+		if nof_neighbors: return f" {str(nof_neighbors)} "
+		return "   "
 	
 	#x coordinates
 	print("   ",end="")
@@ -22,21 +22,14 @@ def print_to_console():
 		#y coordinates
 		n = str(y)
 		n = " "*(2-len(n))+n
-		print(n+"| ", end="")
+		print(n, end="|")
 		#field
 		for x in range(0, game.grid_width):
-			print(choose_symbol(x,y), end="| ")
+			print(choose_symbol(x,y), end="|")
 		#row
 		print("\n  +" + "---+"*game.grid_width)
 
 def read_from_console():
-	def is_int(I):
-		try:
-			int(I)
-			return True
-		except ValueError:
-			return False
-	
 	i = input("x y [f]: ").split(" ")
 	#error checking
 	if len(i) < 2:
@@ -100,3 +93,4 @@ if __name__ == "__main__":
 	else:
 		print_to_console()
 		print("verloren :(")
+
