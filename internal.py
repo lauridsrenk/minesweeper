@@ -21,15 +21,22 @@ done = False
 won = False
 
 
-def init():
-	global covered_table, flagged_table, ismine_table, neighbors_map, done, won
-	_row_covered = 0
+def init(pgrid_width, pgrid_height, pnof_mines):
+	global grid_width, grid_height, nof_mines, covered_table, flagged_table, ismine_table, neighbors_map, done, won
+	assert pnof_mines < pgrid_width*pgrid_height
+	grid_width = pgrid_width
+	grid_height = pgrid_height
+	nof_mines = pnof_mines
+	covered_table = 0
+	flagged_table = 0
+	ismine_table = 0
+	neighbors_map = 0
+	done = False
+	won = False
+	
 	for i in range(0, grid_height):
 		covered_table |= ((1 << (grid_width + 1)) - 2)
 		covered_table <<= (grid_width + 1)
-	flagged_table = 0
-	ismine_table = 0
-	done = False
 
 	#spread mines
 	def choose_field():
