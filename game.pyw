@@ -62,7 +62,7 @@ def handle_events():
 			fullquit()
 
 		if event.type == pygame.KEYUP:
-			#"Quit on Q
+			#Quit on Q
 			if event.key == pygame.K_q:
 				fullquit()
 				
