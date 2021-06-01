@@ -83,15 +83,13 @@ def draw():
 			field_accessor = ((y+1)*(internal.grid_width+1)+x+1)
 			if internal.flagged_table >> field_accessor & 1:
 				screen.blit(tiles["flagged"], [x*Settings.tile_width, y*Settings.tile_height])
-				continue
-			if internal.covered_table >> field_accessor & 1:
+			elif internal.covered_table >> field_accessor & 1:
 				screen.blit(tiles["covered"], [x*Settings.tile_width, y*Settings.tile_height])
-				continue
-			if internal.ismine_table >> field_accessor & 1:
+			elif internal.ismine_table >> field_accessor & 1:
 				screen.blit(tiles["mine"], [x*Settings.tile_width, y*Settings.tile_height])
-				continue
-			nof_neighbors = (internal.neighbors_map >> ((y*internal.grid_width+x)*4) ) & 15
-			screen.blit(tiles["uncovered"][nof_neighbors], [x*Settings.tile_width, y*Settings.tile_height])
+			else:
+				nof_neighbors = (internal.neighbors_map >> ((y*internal.grid_width+x)*4) ) & 15
+				screen.blit(tiles["uncovered"][nof_neighbors], [x*Settings.tile_width, y*Settings.tile_height])
 			
 	pygame.display.flip()
 
