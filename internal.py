@@ -1,3 +1,4 @@
+#the internal logic of minesweeper
 import random
 
 #default settings

@@ -1,3 +1,4 @@
+#Handles I/O, adds reset, etc.
 import internal
 import os
 import pygame
