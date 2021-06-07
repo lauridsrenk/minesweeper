@@ -12,6 +12,9 @@ class Settings:
 
 	fps = 60
 	title = "minesweeper"
+	font = "Arial"
+	fontsize = 32
+	fontcolor = (255,255,255)
 
 	tile_width = 20
 	tile_height = 20
@@ -34,9 +37,8 @@ class Resources:
 	def __init__(self):
 		self.file_path = os.path.dirname(os.path.abspath(__file__))
 		self.images_path = os.path.join(self.file_path, "images")
-		self.tiles = {}
-		self.background = None
 		
+		self.tiles = {}
 		self.tiles["covered"] = pygame.image.load(os.path.join(self.images_path, "tile_covered.png")).convert_alpha()
 		self.tiles["flagged"] = pygame.image.load(os.path.join(self.images_path, "tile_flagged.png")).convert_alpha()
 		self.tiles["mine"] = pygame.image.load(os.path.join(self.images_path, "tile_mine.png")).convert_alpha()
@@ -51,8 +53,11 @@ class Resources:
 			pygame.image.load(os.path.join(self.images_path, "tile_7.png")).convert_alpha(),
 			pygame.image.load(os.path.join(self.images_path, "tile_8.png")).convert_alpha(),
 		]
+		
 		self.background = pygame.image.load(os.path.join(self.images_path, "background.png")).convert()
 		self.background = pygame.transform.scale(self.background, Settings.get_dim())
+		
+		self.font = pygame.font.SysFont(Settings.font, Settings.fontsize)
 
 
 class Game_Controller:
@@ -62,21 +67,25 @@ class Game_Controller:
 		self.clock = pygame.time.Clock()
 		pygame.display.set_caption(Settings.title)
 		self.resources = Resources()
-		self.game_loop = Game_Loop(self.screen, self.clock, self.resources)
+		self.game_loop = Game_Loop(self, self.screen, self.clock, self.resources)
+		self.between_rounds_loop = Between_Rounds_Loop(self, self.screen, self.clock, self.resources)
+		self.done = False
 	
 	def run(self):
-		self.game_loop.run()
+		while not self.done:
+			self.game_loop.run()
+			self.between_rounds_loop.run()
 
 
 class Game_Loop:
-	def __init__(self, screen, clock, resources):
+	def __init__(self, controller, screen, clock, resources):
+		self.controller = controller
 		self.screen = screen
 		self.clock = clock
 		self.resources = resources
-		self.done = False
 		
 	def fullquit(self):
-		self.done = True
+		self.controller.done = True
 		internal.done = True
 		
 	def handle_events(self):
@@ -121,18 +130,65 @@ class Game_Loop:
 		pygame.display.flip()
 
 	def run(self):
-		while not self.done:
-			internal.init(Settings.grid_width, Settings.grid_height, Settings.nof_mines)
-			while not internal.done:
-				nof_evs = self.handle_events()
-				if nof_evs: self.draw() # only update the screen if an event occurred
-				self.clock.tick(Settings.fps)
+		internal.init(Settings.grid_width, Settings.grid_height, Settings.nof_mines)
+		while not internal.done:
+			nof_evs = self.handle_events()
+			if nof_evs: self.draw() # only update the screen if an event occurred
+			self.clock.tick(Settings.fps)
 
 	def get_grid_pos(self, pos = [0,0]):
 		"""
 		get the relative position of a mouse coordinate on the grid
 		"""
 		return (pos[0] - Settings.x_tile_offset) // Settings.tile_width, (pos[1] - Settings.y_tile_offset) // Settings.tile_height
+
+
+class Between_Rounds_Loop:
+	def __init__(self, controller, screen, clock, resources):
+		self.controller = controller
+		self.screen = screen
+		self.clock = clock
+		self.resources = resources
+		self.done = False
+		
+		self.text = self.resources.font.render("New Round? [y/n]", True, Settings.fontcolor)
+		screen_width, screen_height = Settings.get_dim()
+		self.text_pos = (screen_width - self.text.get_rect().width) // 2, (screen_height - self.text.get_rect().height) // 2
+		
+	def fullquit(self):
+		self.controller.done = True
+		self.done = True
+		
+	def handle_events(self):
+		evs = pygame.event.get()
+		for event in evs:
+			#Quit on window closed
+			if event.type == pygame.QUIT:
+				self.fullquit()
+
+			if event.type == pygame.KEYUP:
+				#Quit on Q
+				if event.key == pygame.K_q:
+					self.fullquit()
+					
+				if event.key == pygame.K_y:
+					self.controller.done = False
+					self.done = True
+				if event.key == pygame.K_n:
+					self.controller.done = True
+					self.done = True
+		return len(evs)
+
+	def draw(self):
+		self.screen.blit(self.text, self.text_pos)
+		pygame.display.flip()
+
+	def run(self):
+		self.done = self.controller.done
+		self.draw()
+		while not self.done:
+			self.handle_events()
+			self.clock.tick(Settings.fps)
 
 
 if __name__ == "__main__":
