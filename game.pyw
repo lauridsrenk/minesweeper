@@ -12,10 +12,19 @@ class Settings:
 
 	tile_width = 20
 	tile_height = 20
+	
+	header_height = 80
+	min_width = 60
+	
+	x_tile_offset = max((min_width - grid_width*tile_width) // 2, 0)
+	y_tile_offset = header_height
 
 	@staticmethod
 	def get_dim():
-		return Settings.grid_width*Settings.tile_width, Settings.grid_height*Settings.tile_height
+		return (
+			max(Settings.grid_width*Settings.tile_width, Settings.min_width),
+			Settings.grid_height*Settings.tile_height+Settings.header_height
+		)
 
 screen = None 
 clock = None 
@@ -25,9 +34,10 @@ file_path = os.path.dirname(os.path.abspath(__file__))
 images_path = os.path.join(file_path, "images")
 
 tiles = {}
+background = None
 
 def init():
-	global screen, clock, tiles
+	global screen, clock, tiles, background
 	
 	pygame.init()
 	screen = pygame.display.set_mode(Settings.get_dim())
@@ -48,11 +58,19 @@ def init():
 		pygame.image.load(os.path.join(images_path, "tile_7.png")).convert_alpha(),
 		pygame.image.load(os.path.join(images_path, "tile_8.png")).convert_alpha(),
 	]
+	background = pygame.image.load(os.path.join(images_path, "background.png")).convert()
+	background = pygame.transform.scale(background, Settings.get_dim())
 
 def fullquit():
 	global done
 	done = True
 	internal.done = True
+
+def get_grid_pos(pos = [0,0]):
+	"""
+	get the relative position of a mouse coordinate on the grid
+	"""
+	return (pos[0] - Settings.x_tile_offset) // Settings.tile_width, (pos[1] - Settings.y_tile_offset) // Settings.tile_height
 
 def handle_events():
 	evs = pygame.event.get()
@@ -67,34 +85,34 @@ def handle_events():
 				fullquit()
 				
 		if event.type == pygame.MOUSEBUTTONDOWN:
-			x, y = pygame.mouse.get_pos()
-			x //= Settings.tile_width
-			y //= Settings.tile_height
+			x, y = get_grid_pos(pygame.mouse.get_pos())
 			if event.button == 1 and internal.can_uncover(x,y):
 				internal.uncover(x,y)
 			elif event.button == 3 and internal.can_flag(x,y):
 				internal.toggle_flag(x,y)
 	return len(evs)
 
-
 def draw():
+	screen.blit(background, (0,0))
 	for y in range(internal.grid_height):
 		for x in range(internal.grid_width):
 			field_accessor = ((y+1)*(internal.grid_width+1)+x+1)
+			tile_coordinates = [x*Settings.tile_width + Settings.x_tile_offset, y*Settings.tile_height + Settings.y_tile_offset]
 			if internal.flagged_table >> field_accessor & 1:
-				screen.blit(tiles["flagged"], [x*Settings.tile_width, y*Settings.tile_height])
+				screen.blit(tiles["flagged"], tile_coordinates)
 			elif internal.covered_table >> field_accessor & 1:
-				screen.blit(tiles["covered"], [x*Settings.tile_width, y*Settings.tile_height])
+				screen.blit(tiles["covered"], tile_coordinates)
 			elif internal.ismine_table >> field_accessor & 1:
-				screen.blit(tiles["mine"], [x*Settings.tile_width, y*Settings.tile_height])
+				screen.blit(tiles["mine"], tile_coordinates)
 			else:
 				nof_neighbors = (internal.neighbors_map >> ((y*internal.grid_width+x)*4) ) & 15
-				screen.blit(tiles["uncovered"][nof_neighbors], [x*Settings.tile_width, y*Settings.tile_height])
+				screen.blit(tiles["uncovered"][nof_neighbors], tile_coordinates)
 			
 	pygame.display.flip()
 
 def run():
 	while not done:
+		#run the game
 		internal.init(Settings.grid_width, Settings.grid_height, Settings.nof_mines)
 		while not internal.done:
 			nof_evs = handle_events()

@@ -64,22 +64,30 @@ def init(pgrid_width, pgrid_height, pnof_mines):
 			neighbors_map |= nof_neighbors << ((y*grid_width+x)*4)
 
 def can_flag(x, y):
-	return	((0 <= x < grid_width) and (0 <= y < grid_height) and 
-			(covered_table >> ((y+1)*(grid_width+1)+x+1) & 1))
+	return (
+		not done and
+		(0 <= x < grid_width) and (0 <= y < grid_height) and 
+		(covered_table >> ((y+1)*(grid_width+1)+x+1) & 1)
+	)
 
 def toggle_flag(x, y):
 	global flagged_table
-	#assert can_flag(x, y)
+	assert not done
+	assert can_flag(x, y)
 	flagged_table ^= 1 << ((y+1)*(grid_width+1)+x+1)
 
 def can_uncover(x,y):
-	return	((0 <= x < grid_width) and (0 <= y < grid_height) and
-			(covered_table >> ((y+1)*(grid_width+1)+x+1) & 1) and 
-			not (flagged_table >> ((y+1)*(grid_width+1)+x+1) & 1))
+	return (
+		not done and
+		(0 <= x < grid_width) and (0 <= y < grid_height) and
+		(covered_table >> ((y+1)*(grid_width+1)+x+1) & 1) and 
+		not (flagged_table >> ((y+1)*(grid_width+1)+x+1) & 1)
+	)
 
 def uncover(x, y):
 	global covered_table,flagged_table, done, won
-	#assert can_uncover(x,y)
+	assert not done
+	assert can_uncover(x,y)
 	#check if mine
 	if ismine_table >> ((y+1)*(grid_width+1)+x+1) & 1:
 		covered_table ^= ismine_table
