@@ -6,9 +6,9 @@ class Settings:
 	"""
 	Static Class
 	"""
-	grid_width = 25
-	grid_height = 20
-	nof_mines = 60
+	grid_width = 9
+	grid_height = 9
+	nof_mines = 10
 
 	fps = 60
 	title = "minesweeper"
@@ -20,9 +20,9 @@ class Settings:
 	tile_height = 20
 	
 	header_height = 80
-	min_width = 60
+	min_width = 220
 	
-	x_tile_offset = max((min_width - grid_width*tile_width) // 2, 0)
+	x_tile_offset = max((min_width - (grid_width*tile_width)) // 2, 0)
 	y_tile_offset = header_height
 
 	@staticmethod
@@ -31,6 +31,30 @@ class Settings:
 			max(Settings.grid_width*Settings.tile_width, Settings.min_width),
 			Settings.grid_height*Settings.tile_height+Settings.header_height
 		)
+		
+	@staticmethod
+	def set_easy():
+		Settings.grid_width = 9
+		Settings.grid_height = 9
+		Settings.nof_mines = 10
+		Settings.x_tile_offset = max((Settings.min_width - (Settings.grid_width*Settings.tile_width)) // 2, 0)
+		Settings.y_tile_offset = Settings.header_height
+		
+	@staticmethod
+	def set_medium():
+		Settings.grid_width = 25
+		Settings.grid_height = 20
+		Settings.nof_mines = 60
+		Settings.x_tile_offset = max((Settings.min_width - (Settings.grid_width*Settings.tile_width)) // 2, 0)
+		Settings.y_tile_offset = Settings.header_height
+		
+	@staticmethod
+	def set_difficult():
+		Settings.grid_width = 65
+		Settings.grid_height = 35
+		Settings.nof_mines = 450
+		Settings.x_tile_offset = max((Settings.min_width - (Settings.grid_width*Settings.tile_width)) // 2, 0)
+		Settings.y_tile_offset = Settings.header_height
 
 
 class Resources:
@@ -63,6 +87,7 @@ class Resources:
 class Game_Controller:
 	def __init__(self):
 		pygame.init()
+		Settings.set_medium()
 		self.screen = pygame.display.set_mode(Settings.get_dim())
 		self.clock = pygame.time.Clock()
 		pygame.display.set_caption(Settings.title)
