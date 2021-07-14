@@ -58,7 +58,7 @@ class Settings:
 Settings.set_medium()
 
 class Resources:
-	def __init__(self):
+	def __init__(self, screen_dim):
 		self.file_path = os.path.dirname(os.path.abspath(__file__))
 		self.images_path = os.path.join(self.file_path, "images")
 		
@@ -78,8 +78,8 @@ class Resources:
 			pygame.image.load(os.path.join(self.images_path, "tile_8.png")).convert_alpha(),
 		]
 		
-		self.background = pygame.image.load(os.path.join(self.images_path, "background.png")).convert()
-		self.background = pygame.transform.scale(self.background, Settings.get_dim())
+		self._background = pygame.image.load(os.path.join(self.images_path, "background.png")).convert()
+		self.scale_background(screen_dim)
 		
 		self.smileys = {}
 		self.smileys["happy1"] = pygame.image.load(os.path.join(self.images_path, "smiley000.png")).convert_alpha()
@@ -88,6 +88,10 @@ class Resources:
 		self.smileys["happy2"] = pygame.image.load(os.path.join(self.images_path, "smiley010.png")).convert_alpha()
 		self.smileys["dead2"] = pygame.image.load(os.path.join(self.images_path, "smiley011.png")).convert_alpha()
 		self.smileys["sunglasses2"] = pygame.image.load(os.path.join(self.images_path, "smiley012.png")).convert_alpha()
+		
+	def scale_background(self, dim):
+		self.background = pygame.transform.scale(self._background, dim)
+		
 
 
 class Game_Controller:
@@ -96,7 +100,7 @@ class Game_Controller:
 		self.screen = pygame.display.set_mode(Settings.get_dim())
 		self.clock = pygame.time.Clock()
 		pygame.display.set_caption(Settings.title)
-		self.resources = Resources()
+		self.resources = Resources(self.screen.get_size())
 		
 		self.smiley = Smiley(self.resources)
 		self.game_loop = Game_Loop(self, self.screen, self.clock, self.resources, self.smiley)
@@ -131,12 +135,12 @@ class Game_Loop:
 			if event.type == pygame.QUIT:
 				self.fullquit()
 
-			if event.type == pygame.KEYUP:
+			elif event.type == pygame.KEYUP:
 				#Quit on Q
 				if event.key == pygame.K_q:
 					self.fullquit()
 					
-			if event.type == pygame.MOUSEBUTTONDOWN:
+			elif event.type == pygame.MOUSEBUTTONDOWN:
 				gx, gy = self.get_grid_pos(pygame.mouse.get_pos())
 				mx, my = pygame.mouse.get_pos()
 				if event.button == 1 and internal.can_uncover(gx,gy):
